@@ -44,9 +44,11 @@ def edge (x y : α ) : Algraph α  :=
 def edges :  (List (α × α)) -> Algraph α :=
   (List.foldr overlay empty) ∘ (List.map (fun (x, y) => edge x y))
 
-def vertices  : List α  -> Algraph α  := (List.foldr overlay empty) ∘  (List.map vertex)
+def vertices  : List α  -> Algraph α  := 
+  (List.foldr overlay empty) ∘  (List.map vertex)
+
 def clique  : List α  -> Algraph α := 
- (List.foldr connect empty) ∘  (List.map vertex)
+  (List.foldr connect empty) ∘  (List.map vertex)
 
 def graph  (vs : List α) (es : List (α × α)):  Algraph α :=
   overlay (vertices vs) (edges es)
@@ -210,6 +212,10 @@ theorem clique_conn :
           rw [connect_congr_right (vertex x) ih]
           simp [conn_assoc]
           rfl
+
+def graph_correct (nodes : Set α) (edges : Set (α × α)) : Prop  := 
+    ∀x ∈ edges, x.1 ∈ nodes /\ x.2 ∈ nodes
+
 
 end Algraph
 
