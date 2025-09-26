@@ -1,0 +1,14 @@
+name = "algraph"
+version = "0.1.0"
+defaultTargets = ["algraph"]
+
+[[lean_lib]]
+name = "Algraph"
+
+[[lean_exe]]
+name = "algraph"
+root = "Main"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"

@@ -1,0 +1,35 @@
+theory Algraph imports Main
+begin
+
+datatype 'a algraph =
+  Empty
+  | Vertex "'a"
+  | Connect "'a algraph" "'a algraph"
+  | Overlay "'a algraph" "'a algraph"
+
+fun semant :: "'a algraph \<Rightarrow> (('a *'a) set) * 'a set" where
+  "semant Empty =({}, {})"
+| "semant (Vertex v) = ({}, {v})"
+| "semant (Overlay x y) = 
+    (let (x_edges, x_verts) = semant x in
+    let (y_edges, y_verts) = semant y in
+    (x_edges \<union> y_edges, x_verts \<union> y_verts))"
+| "semant (Connect x y) = 
+    (let (x_edges, x_verts) = semant x in
+    let (y_edges, y_verts) = semant y in
+    (x_edges \<union> y_edges \<union> ({Pair x y | x y. x \<in> x_verts \<and> y \<in> y_verts}), x_verts \<union> y_verts))"
+
+fun edge :: "'a \<Rightarrow> 'a \<Rightarrow> 'a algraph" where
+  "edge x y = Connect (Vertex x) (Vertex y)"
+
+fun edges :: "('a * 'a) list \<Rightarrow> 'a algraph" where
+  "edges l = (
+    let edges = map (\<lambda>(x, y). edge x y) l in
+    fold (\<lambda> v acc. Overlay v acc) edges Empty)"
+
+fun vertices  :: "'a list \<Rightarrow> 'a algraph" where
+  "edges l = (
+    let verts = map (\<lambda>x. Vertex x) l in
+    fold (\<lambda> v acc. Overlay v acc) verts Empty)"
+
+end
