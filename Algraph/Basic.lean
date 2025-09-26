@@ -177,12 +177,17 @@ lemma conn_assoc : ⟪connect (connect x y) z⟫ = ⟪connect x (connect y z)⟫
 lemma clique_empty : ⟪ clique ([]:List α) ⟫ = ⟪ empty ⟫ := by
   simp [clique, semant]
 
+lemma connect_congr_right (x : Algraph α) {y z : Algraph α} (h : ⟪y⟫ = ⟪z⟫) : 
+    ⟪connect x y⟫ = ⟪connect x z⟫ := by
+  simp [semant]
+  rw [h]
+  simp [Set.prod]
+
+-- Agraph with connect is a monoid it seems
 theorem clique_conn :
     ⟪clique (xs ++ ys)⟫ = ⟪connect (clique xs) (clique ys)⟫ := by
       induction xs with
       | nil => 
-        -- What is clique [] ? 
-        -- What does connect empty (clique ys) equal?
         simp [semant]
         simp [Set.prod.eq_def]
         simp [clique_empty]
@@ -190,19 +195,23 @@ theorem clique_conn :
         simp
 
       | cons x xs' ih =>
-        -- If you know the property holds for xs', 
-        -- can you show it holds for (x :: xs')?
-        -- Hint: How does foldr process x :: xs'?
-        rw [clique]
-        simp [conn_assoc]
+          have clique_cons : clique (x :: xs') = connect (vertex x) (clique xs') := by
+            simp [clique, List.map_cons, List.foldr_cons]
+          
+          rw [List.cons_append]
+          rw [clique_cons]
+          simp [clique]
 
+          have foldr_eq : List.foldr connect (List.foldr connect empty (List.map vertex ys)) (List.map vertex xs') = 
+                          clique (xs' ++ ys) := by
+            simp [clique, List.map_append, List.foldr_append]
 
-
-        
-        
+          rw [foldr_eq]
+          rw [connect_congr_right (vertex x) ih]
+          simp [conn_assoc]
+          rfl
 
 end Algraph
-
 
 #eval ([1, 2, 3, 4].foldr (· + ·) 0)
 #eval (([1, 2] ++ [ 3, 4]).foldr (· + ·) 0)
